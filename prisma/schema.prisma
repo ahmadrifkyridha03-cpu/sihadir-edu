@@ -1,0 +1,424 @@
+// ==============================================================================
+// SiHadir-Edu: Prisma Schema Definition
+// Database: Supabase PostgreSQL 15+
+// Models: 17 Models | Enums: 13 Enums | Foreign Keys: 29 Relations
+// ==============================================================================
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ==============================================================================
+// ENUMS (13 Domain Enumerations)
+// ==============================================================================
+
+enum Role {
+  ADMIN
+  TEACHER
+  PARENT
+  STUDENT
+  SCANNER
+}
+
+enum Gender {
+  L
+  P
+}
+
+enum StudentStatus {
+  ACTIVE
+  GRADUATED
+  MOVED
+}
+
+enum ParentRelation {
+  AYAH
+  IBU
+  WALI
+}
+
+enum GateStatus {
+  HADIR
+  TERLAMBAT
+  IZIN
+  SAKIT
+  ALPA
+}
+
+enum SubjectStatus {
+  HADIR
+  SAKIT
+  IZIN
+  ALPA_BOLOS
+}
+
+enum EngagementBadge {
+  ACTIVE_STAR   // 🌟 Sangat Aktif
+  GOOD          // ✅ Mengikuti Pembelajaran (Default)
+  LESS_FOCUS    // ⚠️ Kurang Fokus / Mengantuk
+  NO_TASK       // ❌ Tidak Mengumpulkan Tugas
+}
+
+enum AssessmentCategory {
+  TUGAS
+  KUIS
+  PRAKTIKUM
+  UH
+  PTS
+  PAS
+}
+
+enum DocVisibility {
+  CLASS_PUBLIC
+  TAGGED_STUDENTS_ONLY
+}
+
+enum LeaveType {
+  SAKIT
+  IZIN
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum WaNotifType {
+  GATE_LATE
+  GATE_IN
+  ABSENT_ALERT
+  GRADE_UPDATE
+  DAILY_DIGEST
+}
+
+enum WaStatus {
+  QUEUED
+  SENT
+  FAILED
+}
+
+// ==============================================================================
+// 1. USERS & PROFILES (User, Teacher, Parent, Student, ParentStudentLink)
+// ==============================================================================
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  name         String   @db.VarChar(120)
+  phoneWa      String?  @unique @map("phone_wa") @db.VarChar(20)
+  email        String?  @unique @db.VarChar(120)
+  passwordHash String   @map("password_hash") @db.Text
+  role         Role     @default(PARENT)
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  teacher      Teacher?
+  parent       Parent?
+  student      Student?
+
+  @@map("users")
+}
+
+model Teacher {
+  id             String          @id @default(uuid()) @db.Uuid
+  userId         String          @unique @map("user_id") @db.Uuid
+  nip            String?         @unique @db.VarChar(30)
+  fullName       String          @map("full_name") @db.VarChar(120)
+  phoneWa        String          @map("phone_wa") @db.VarChar(20)
+  specialty      String?         @db.VarChar(100)
+
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  homeroomClass  Class?          @relation("HomeroomTeacher")
+  schedules      Schedule[]
+  journals       ClassJournal[]
+  assessments    Assessment[]
+  approvedLeaves LeaveRequest[]  @relation("ApprovedByTeacher")
+
+  @@map("teachers")
+}
+
+model Parent {
+  id            String              @id @default(uuid()) @db.Uuid
+  userId        String              @unique @map("user_id") @db.Uuid
+  fullName      String              @map("full_name") @db.VarChar(120)
+  phoneWa       String              @unique @map("phone_wa") @db.VarChar(20)
+  occupation    String?             @db.VarChar(100)
+
+  user          User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  studentLinks  ParentStudentLink[]
+  leaveRequests LeaveRequest[]
+
+  @@map("parents")
+}
+
+model Student {
+  id                 String              @id @default(uuid()) @db.Uuid
+  userId             String?             @unique @map("user_id") @db.Uuid
+  classId            String              @map("class_id") @db.Uuid
+  nis                String              @unique @db.VarChar(20)
+  nisn               String              @unique @db.VarChar(20)
+  fullName           String              @map("full_name") @db.VarChar(120)
+  gender             Gender              @default(L)
+  photoUrl           String?             @map("photo_url") @db.Text
+  qrToken            String              @unique @map("qr_token") @db.VarChar(64)
+  status             StudentStatus       @default(ACTIVE)
+  createdAt          DateTime            @default(now()) @map("created_at")
+
+  user               User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
+  class              Class               @relation(fields: [classId], references: [id], onDelete: Restrict)
+  parentLinks        ParentStudentLink[]
+  gateAttendances    GateAttendance[]
+  subjectAttendances SubjectAttendance[]
+  studentGrades      StudentGrade[]
+  leaveRequests      LeaveRequest[]
+  waNotificationLogs WaNotificationLog[]
+
+  @@index([classId])
+  @@index([qrToken])
+  @@map("students")
+}
+
+// Many-to-Many junction table for Multi-child / Sibling support
+model ParentStudentLink {
+  id             String         @id @default(uuid()) @db.Uuid
+  parentId       String         @map("parent_id") @db.Uuid
+  studentId      String         @map("student_id") @db.Uuid
+  relation       ParentRelation @default(AYAH)
+  receiveWaNotif Boolean        @default(true) @map("receive_wa_notif")
+
+  parent         Parent         @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  student        Student        @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([parentId, studentId])
+  @@map("parent_student_links")
+}
+
+// ==============================================================================
+// 2. ACADEMIC STRUCTURE (AcademicYear, Class, Subject, Schedule)
+// ==============================================================================
+
+model AcademicYear {
+  id        String   @id @default(uuid()) @db.Uuid
+  yearName  String   @map("year_name") @db.VarChar(20) // e.g. "2026/2027"
+  semester  Int      @default(1) // 1: Ganjil, 2: Genap
+  isActive  Boolean  @default(true) @map("is_active")
+  classes   Class[]
+
+  @@map("academic_years")
+}
+
+model Class {
+  id                String         @id @default(uuid()) @db.Uuid
+  academicYearId    String         @map("academic_year_id") @db.Uuid
+  homeroomTeacherId String?        @unique @map("homeroom_teacher_id") @db.Uuid
+  className         String         @map("class_name") @db.VarChar(50) // e.g. "X-IPA-1"
+  gradeLevel        Int            @map("grade_level") // 7, 8, 9 or 10, 11, 12
+
+  academicYear      AcademicYear   @relation(fields: [academicYearId], references: [id], onDelete: Restrict)
+  homeroomTeacher   Teacher?       @relation("HomeroomTeacher", fields: [homeroomTeacherId], references: [id], onDelete: SetNull)
+  students          Student[]
+  schedules         Schedule[]
+  classJournals     ClassJournal[]
+  assessments       Assessment[]
+
+  @@index([academicYearId])
+  @@map("classes")
+}
+
+model Subject {
+  id            String         @id @default(uuid()) @db.Uuid
+  subjectCode   String         @unique @map("subject_code") @db.VarChar(20) // e.g. "MTK", "BIN"
+  subjectName   String         @map("subject_name") @db.VarChar(100)
+  kkmScore      Decimal        @default(75.00) @map("kkm_score") @db.Decimal(5, 2)
+
+  schedules     Schedule[]
+  classJournals ClassJournal[]
+  assessments   Assessment[]
+
+  @@map("subjects")
+}
+
+model Schedule {
+  id            String         @id @default(uuid()) @db.Uuid
+  classId       String         @map("class_id") @db.Uuid
+  subjectId     String         @map("subject_id") @db.Uuid
+  teacherId     String         @map("teacher_id") @db.Uuid
+  dayOfWeek     Int            @map("day_of_week") // 1: Senin .. 6: Sabtu
+  periodStart   Int            @map("period_start") // Jam ke-
+  periodEnd     Int            @map("period_end")
+
+  class         Class          @relation(fields: [classId], references: [id], onDelete: Cascade)
+  subject       Subject        @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  teacher       Teacher        @relation(fields: [teacherId], references: [id], onDelete: Restrict)
+  classJournals ClassJournal[]
+
+  @@index([classId, dayOfWeek])
+  @@map("schedules")
+}
+
+// ==============================================================================
+// 3. ATTENDANCE ENTITIES (GateAttendance, ClassJournal, SubjectAttendance)
+// ==============================================================================
+
+model GateAttendance {
+  id             String     @id @default(uuid()) @db.Uuid
+  studentId      String     @map("student_id") @db.Uuid
+  attendanceDate DateTime   @map("attendance_date") @db.Date
+  checkInTime    DateTime?  @map("check_in_time")
+  checkOutTime   DateTime?  @map("check_out_time")
+  status         GateStatus @default(HADIR)
+  lateMinutes    Int        @default(0) @map("late_minutes")
+  scannedBy      String?    @map("scanned_by") @db.VarChar(100)
+
+  student        Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, attendanceDate])
+  @@index([attendanceDate, status])
+  @@map("gate_attendances")
+}
+
+model ClassJournal {
+  id                 String              @id @default(uuid()) @db.Uuid
+  scheduleId         String?             @map("schedule_id") @db.Uuid
+  classId            String              @map("class_id") @db.Uuid
+  subjectId          String              @map("subject_id") @db.Uuid
+  teacherId          String              @map("teacher_id") @db.Uuid
+  journalDate        DateTime            @map("journal_date") @db.Date
+  periodStart        Int                 @map("period_start")
+  periodEnd          Int                 @map("period_end")
+  topicMaterial      String              @map("topic_material") @db.VarChar(255)
+  teacherNotes       String?             @map("teacher_notes") @db.Text
+  createdAt          DateTime            @default(now()) @map("created_at")
+
+  schedule           Schedule?           @relation(fields: [scheduleId], references: [id], onDelete: SetNull)
+  class              Class               @relation(fields: [classId], references: [id], onDelete: Restrict)
+  subject            Subject             @relation(fields: [subjectId], references: [id], onDelete: Restrict)
+  teacher            Teacher             @relation(fields: [teacherId], references: [id], onDelete: Restrict)
+  subjectAttendances SubjectAttendance[]
+  documentations     Documentation[]
+  assessments        Assessment[]
+
+  @@index([classId, journalDate])
+  @@map("class_journals")
+}
+
+model SubjectAttendance {
+  id              String          @id @default(uuid()) @db.Uuid
+  journalId       String          @map("journal_id") @db.Uuid
+  studentId       String          @map("student_id") @db.Uuid
+  status          SubjectStatus   @default(HADIR)
+  engagementBadge EngagementBadge @default(GOOD) @map("engagement_badge")
+  note            String?         @db.VarChar(255)
+
+  journal         ClassJournal    @relation(fields: [journalId], references: [id], onDelete: Cascade)
+  student         Student         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([journalId, studentId])
+  @@index([studentId, status])
+  @@map("subject_attendances")
+}
+
+// ==============================================================================
+// 4. LEARNING PROOF & ASSESSMENTS (Documentation, Assessment, StudentGrade)
+// ==============================================================================
+
+model Documentation {
+  id               String        @id @default(uuid()) @db.Uuid
+  journalId        String        @map("journal_id") @db.Uuid
+  imageUrl         String        @map("image_url") @db.Text
+  caption          String?       @db.VarChar(255)
+  visibility       DocVisibility @default(CLASS_PUBLIC)
+  taggedStudentIds Json?         @map("tagged_student_ids") // String[] of student UUIDs
+  fileSizeKb       Int           @map("file_size_kb")
+  createdAt        DateTime      @default(now()) @map("created_at")
+
+  journal          ClassJournal  @relation(fields: [journalId], references: [id], onDelete: Cascade)
+
+  @@index([journalId])
+  @@map("documentations")
+}
+
+model Assessment {
+  id             String             @id @default(uuid()) @db.Uuid
+  classId        String             @map("class_id") @db.Uuid
+  subjectId      String             @map("subject_id") @db.Uuid
+  teacherId      String             @map("teacher_id") @db.Uuid
+  journalId      String?            @map("journal_id") @db.Uuid
+  title          String             @db.VarChar(120)
+  category       AssessmentCategory @default(TUGAS)
+  assessmentDate DateTime           @map("assessment_date") @db.Date
+  maxScore       Decimal            @default(100.00) @map("max_score") @db.Decimal(5, 2)
+
+  class          Class              @relation(fields: [classId], references: [id], onDelete: Cascade)
+  subject        Subject            @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  teacher        Teacher            @relation(fields: [teacherId], references: [id], onDelete: Restrict)
+  journal        ClassJournal?      @relation(fields: [journalId], references: [id], onDelete: SetNull)
+  grades         StudentGrade[]
+
+  @@index([classId, subjectId])
+  @@map("assessments")
+}
+
+model StudentGrade {
+  id              String     @id @default(uuid()) @db.Uuid
+  assessmentId    String     @map("assessment_id") @db.Uuid
+  studentId       String     @map("student_id") @db.Uuid
+  score           Decimal    @db.Decimal(5, 2)
+  teacherFeedback String?    @map("teacher_feedback") @db.VarChar(255)
+  updatedAt       DateTime   @updatedAt @map("updated_at")
+
+  assessment      Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  student         Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([assessmentId, studentId])
+  @@index([studentId])
+  @@map("student_grades")
+}
+
+// ==============================================================================
+// 5. LEAVE REQUESTS & WHATSAPP LOGS (LeaveRequest, WaNotificationLog)
+// ==============================================================================
+
+model LeaveRequest {
+  id             String         @id @default(uuid()) @db.Uuid
+  studentId      String         @map("student_id") @db.Uuid
+  parentId       String         @map("parent_id") @db.Uuid
+  startDate      DateTime       @map("start_date") @db.Date
+  endDate        DateTime       @map("end_date") @db.Date
+  leaveType      LeaveType      @map("leave_type")
+  reason         String         @db.Text
+  attachmentUrl  String?        @map("attachment_url") @db.Text
+  approvalStatus ApprovalStatus @default(PENDING) @map("approval_status")
+  approvedById   String?        @map("approved_by_id") @db.Uuid
+  createdAt      DateTime       @default(now()) @map("created_at")
+
+  student        Student        @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  parent         Parent         @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  approvedBy     Teacher?       @relation("ApprovedByTeacher", fields: [approvedById], references: [id], onDelete: SetNull)
+
+  @@index([studentId, approvalStatus])
+  @@map("leave_requests")
+}
+
+model WaNotificationLog {
+  id          String      @id @default(uuid()) @db.Uuid
+  studentId   String      @map("student_id") @db.Uuid
+  targetPhone String      @map("target_phone") @db.VarChar(20)
+  notifType   WaNotifType @map("notif_type")
+  messageBody String      @map("message_body") @db.Text
+  status      WaStatus    @default(QUEUED)
+  scheduledAt DateTime    @default(now()) @map("scheduled_at")
+  sentAt      DateTime?   @map("sent_at")
+
+  student     Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([status, scheduledAt])
+  @@map("wa_notification_logs")
+}

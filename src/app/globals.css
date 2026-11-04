@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-primary: #2563EB;
+    --color-primary-hover: #1D4ED8;
+    --color-background: #F8FAFC;
+    --color-surface: #FFFFFF;
+    --color-foreground: #0F172A;
+    --color-muted: #475569;
+    --color-border: #E2E8F0;
+
+    /* Semantic Status Tokens */
+    --status-hadir-fg: #059669;
+    --status-hadir-bg: #D1FAE5;
+    --status-terlambat-fg: #D97706;
+    --status-terlambat-bg: #FEF3C7;
+    --status-izin-fg: #0284C7;
+    --status-izin-bg: #E0F2FE;
+    --status-sakit-fg: #7C3AED;
+    --status-sakit-bg: #EDE9FE;
+    --status-alpa-fg: #E11D48;
+    --status-alpa-bg: #FFE4E6;
+  }
+
+  * {
+    box-sizing: border-box;
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@layer utilities {
+  /* Numerical alignment for timestamps, scores, and recap grids */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Emil Kowalski active button press feedback */
+  .btn-press {
+    transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  .btn-press:active {
+    transform: scale(0.97);
+  }
+
+  /* Accessible touch target size standard */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Snappy entrance animation: never animate from scale(0) */
+  .animate-enter-snappy {
+    animation: enterSnappy 200ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  }
+
+  @keyframes enterSnappy {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+}
+
+/* Reduced motion accessibility compliance */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
