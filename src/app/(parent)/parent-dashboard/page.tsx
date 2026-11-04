@@ -14,6 +14,8 @@ interface ParentDashboardProps {
   }>;
 }
 
+export const dynamic = 'force-dynamic';
+
 export default async function ParentDashboardPage({
   searchParams,
 }: ParentDashboardProps) {

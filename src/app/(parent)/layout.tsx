@@ -8,6 +8,8 @@ import { ParentBottomNav } from '@/components/parent/ParentBottomNav';
 import { ShieldCheck, LogOut } from 'lucide-react';
 import { parentLogoutAction } from '@/actions/parent-auth';
 
+export const dynamic = 'force-dynamic';
+
 export default async function ParentPortalLayout({
   children,
 }: {

@@ -37,14 +37,20 @@ export function verifyPin(pin: string, storedHash: string): boolean {
     const salt = parts[3];
     const expectedHash = parts[4];
 
-    if (!iterations || !salt || !expectedHash) return false;
+    if (isNaN(iterations) || iterations < 1 || iterations > 2147483647 || !salt || !expectedHash) {
+      return false;
+    }
 
-    const computedHash = crypto.pbkdf2Sync(pin, salt, iterations, KEY_LENGTH, DIGEST).toString('hex');
-    const expectedBuf = Buffer.from(expectedHash, 'hex');
-    const computedBuf = Buffer.from(computedHash, 'hex');
+    try {
+      const computedHash = crypto.pbkdf2Sync(pin, salt, iterations, KEY_LENGTH, DIGEST).toString('hex');
+      const expectedBuf = Buffer.from(expectedHash, 'hex');
+      const computedBuf = Buffer.from(computedHash, 'hex');
 
-    if (expectedBuf.length !== computedBuf.length) return false;
-    return crypto.timingSafeEqual(expectedBuf, computedBuf);
+      if (expectedBuf.length !== computedBuf.length) return false;
+      return crypto.timingSafeEqual(expectedBuf, computedBuf);
+    } catch {
+      return false;
+    }
   }
 
   // 2. Compatibility fallback for seeded database users with bcrypt hash

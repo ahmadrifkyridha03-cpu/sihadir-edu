@@ -23,6 +23,8 @@ interface PageProps {
   }>;
 }
 
+export const dynamic = 'force-dynamic';
+
 export default async function RecapAttendancePage({ searchParams }: PageProps) {
   const resolvedParams = await searchParams;
   const classes = await db.class.findMany({

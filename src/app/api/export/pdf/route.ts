@@ -3,6 +3,8 @@ import { generateAttendanceMatrixRecap } from '@/lib/analytics/recap-matrix';
 import { generateAttendanceMatrixPdf } from '@/lib/export/pdf-export';
 import { db } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;

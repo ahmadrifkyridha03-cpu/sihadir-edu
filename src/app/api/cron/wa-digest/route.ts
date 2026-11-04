@@ -8,6 +8,8 @@ import {
 import { getWibNow, formatWibTime, formatIndoDate } from '@/lib/timezone';
 import { WaNotifType } from '@prisma/client';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const today = getWibNow().wibDate;

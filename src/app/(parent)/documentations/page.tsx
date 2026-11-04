@@ -12,6 +12,8 @@ interface DocumentationsPageProps {
   }>;
 }
 
+export const dynamic = 'force-dynamic';
+
 export default async function DocumentationsPage({
   searchParams,
 }: DocumentationsPageProps) {
