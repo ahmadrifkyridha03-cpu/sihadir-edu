@@ -37,7 +37,7 @@ export function verifyPin(pin: string, storedHash: string): boolean {
     const salt = parts[3];
     const expectedHash = parts[4];
 
-    if (isNaN(iterations) || iterations < 1 || iterations > 2147483647 || !salt || !expectedHash) {
+    if (!iterations || isNaN(iterations) || iterations < 1 || iterations > 2147483647 || !salt || !expectedHash) {
       return false;
     }
 

@@ -7,11 +7,11 @@ export const badgeVariants = cva(
   {
     variants: {
       status: {
-        hadir: 'bg-emerald-100 text-emerald-800 border-emerald-300/80',
+        hadir: 'bg-emerald-100 text-emerald-900 border-emerald-300/80',
         terlambat: 'bg-amber-100 text-amber-900 border-amber-300/80',
-        izin: 'bg-sky-100 text-sky-800 border-sky-300/80',
+        izin: 'bg-sky-100 text-sky-900 border-sky-300/80',
         sakit: 'bg-violet-100 text-violet-800 border-violet-300/80',
-        alpa: 'bg-rose-100 text-rose-800 border-rose-300/80',
+        alpa: 'bg-rose-100 text-rose-900 border-rose-300/80',
         neutral: 'bg-slate-100 text-slate-800 border-slate-200',
         navy: 'bg-navy-50 text-navy-900 border-navy-200',
       },

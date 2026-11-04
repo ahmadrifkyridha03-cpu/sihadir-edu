@@ -18,16 +18,16 @@
     --color-navy-700: #1D4ED8;
     --color-navy-50: #EFF6FF;
 
-    /* Semantic Status Tokens (Calibrated to WCAG AAA contrast >= 6.7:1) */
-    --status-hadir-fg: #065F46;
+    /* Semantic Status Tokens (Calibrated to WCAG AAA contrast >= 7.0:1; legacy #065F46 #075985 #9F1239) */
+    --status-hadir-fg: #064E3B; /* 8.57:1 on #D1FAE5 */
     --status-hadir-bg: #D1FAE5;
-    --status-terlambat-fg: #78350F;
+    --status-terlambat-fg: #78350F; /* 8.15:1 on #FEF3C7 */
     --status-terlambat-bg: #FEF3C7;
-    --status-izin-fg: #075985;
+    --status-izin-fg: #0C4A6E; /* 8.24:1 on #E0F2FE */
     --status-izin-bg: #E0F2FE;
-    --status-sakit-fg: #5B21B6;
+    --status-sakit-fg: #5B21B6; /* 7.57:1 on #EDE9FE */
     --status-sakit-bg: #EDE9FE;
-    --status-alpa-fg: #9F1239;
+    --status-alpa-fg: #881337; /* 7.97:1 on #FFE4E6 */
     --status-alpa-bg: #FFE4E6;
   }
 

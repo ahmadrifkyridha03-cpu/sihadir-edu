@@ -396,12 +396,17 @@ function calculateContrastRatio(fgHex: string, bgHex: string): number {
 const cssFile = path.resolve(__dirname, '../src/app/globals.css');
 const cssContent = fs.readFileSync(cssFile, 'utf-8');
 
+const extractToken = (varName: string, fallback: string) => {
+  const match = cssContent.match(new RegExp(`${varName}:\\s*([#0-9a-fA-F]{7})`, 'i'));
+  return match ? match[1] : fallback;
+};
+
 const statusTokens = [
-  { name: 'HADIR', fg: '#065F46', bg: '#D1FAE5' },
-  { name: 'TERLAMBAT', fg: '#78350F', bg: '#FEF3C7' },
-  { name: 'IZIN', fg: '#075985', bg: '#E0F2FE' },
-  { name: 'SAKIT', fg: '#5B21B6', bg: '#EDE9FE' },
-  { name: 'ALPA', fg: '#9F1239', bg: '#FFE4E6' },
+  { name: 'HADIR', fg: extractToken('--status-hadir-fg', '#064E3B'), bg: extractToken('--status-hadir-bg', '#D1FAE5') },
+  { name: 'TERLAMBAT', fg: extractToken('--status-terlambat-fg', '#78350F'), bg: extractToken('--status-terlambat-bg', '#FEF3C7') },
+  { name: 'IZIN', fg: extractToken('--status-izin-fg', '#0C4A6E'), bg: extractToken('--status-izin-bg', '#E0F2FE') },
+  { name: 'SAKIT', fg: extractToken('--status-sakit-fg', '#5B21B6'), bg: extractToken('--status-sakit-bg', '#EDE9FE') },
+  { name: 'ALPA', fg: extractToken('--status-alpa-fg', '#881337'), bg: extractToken('--status-alpa-bg', '#FFE4E6') },
 ];
 
 for (const token of statusTokens) {
