@@ -13,17 +13,21 @@ const prismaClientSingleton = () => {
   })
 }
 
-// Extend NodeJS global type definition for hot-reload persistence
+// Extend NodeJS global type definition for hot-reload persistence and mock isolation
 declare const globalThis: {
-  prismaGlobal: ReturnType<typeof prismaClientSingleton> | undefined
+  prismaGlobal: any | undefined
 } & typeof global
 
-export const db = globalThis.prismaGlobal ?? prismaClientSingleton()
-
-// Assign to globalThis in non-production environments to reuse the instance
-if (process.env.NODE_ENV !== 'production') {
-  globalThis.prismaGlobal = db
-}
+export const db: PrismaClient = new Proxy({} as any, {
+  get(_target, prop) {
+    const activeDb = globalThis.prismaGlobal ?? (globalThis.prismaGlobal = prismaClientSingleton())
+    const val = activeDb[prop]
+    if (typeof val === 'function') {
+      return val.bind(activeDb)
+    }
+    return val
+  },
+})
 
 // Aliases and default export for maximum consumer flexibility
 export const prisma = db

@@ -7,7 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "python tests/run_all_e2e_tests.py",
+    "test:e2e:ts": "tsx tests/e2e/runner.ts",
+    "test:all": "python tests/run_all_e2e_tests.py --all"
   },
   "dependencies": {
     "@prisma/client": "^6.4.1",
