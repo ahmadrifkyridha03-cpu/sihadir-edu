@@ -190,11 +190,10 @@ export async function getStudentActivityTimeline(
       orderBy: [{ journalDate: 'desc' }, { periodStart: 'asc' }],
     }),
 
-    // Approved Leaves
+    // Leaves (Approved, Pending, and Rejected)
     db.leaveRequest.findMany({
       where: {
         studentId,
-        approvalStatus: 'APPROVED',
         startDate: { lte: endDate },
         endDate: { gte: startDate },
       },
@@ -261,18 +260,32 @@ export async function getStudentActivityTimeline(
     let classesAttended = 0;
     let starsEarned = 0;
 
-    // 4a. Approved Leave Record (if present on this day)
+    // 4a. Leave Record (if present on this day)
     if (leaveRecord) {
+      let badgeLabel = 'Izin Diproses';
+      let badgeVariant: 'info' | 'warning' | 'danger' = 'warning';
+
+      if (leaveRecord.approvalStatus === 'APPROVED') {
+        badgeLabel = leaveRecord.leaveType === 'SAKIT' ? 'Sakit Disetujui' : 'Izin Disetujui';
+        badgeVariant = 'info';
+      } else if (leaveRecord.approvalStatus === 'REJECTED') {
+        badgeLabel = 'Permohonan Ditolak';
+        badgeVariant = 'danger';
+      } else {
+        badgeLabel = 'Menunggu Persetujuan';
+        badgeVariant = 'warning';
+      }
+
       items.push({
         id: `leave-${leaveRecord.id}-${dateKey}`,
         type: 'LEAVE_RECORD',
         timestamp: `${dateKey}T06:30:00.000Z`,
         timeFormatted: 'Sepanjang Hari',
-        title: `Izin Tidak Masuk (${leaveRecord.leaveType === 'SAKIT' ? 'Sakit' : 'Izin'})`,
+        title: `Permohonan ${leaveRecord.leaveType === 'SAKIT' ? 'Sakit' : 'Izin'} (${leaveRecord.approvalStatus})`,
         subtitle: leaveRecord.reason,
         statusBadge: {
-          label: leaveRecord.leaveType === 'SAKIT' ? 'Sakit Disetujui' : 'Izin Disetujui',
-          variant: 'info',
+          label: badgeLabel,
+          variant: badgeVariant,
         },
         details: {},
       });

@@ -310,7 +310,7 @@ export async function recordManualGateScan(
       };
     }
 
-    return recordGateScan(student.qrToken, operatorId || 'KIOSK_MANUAL_INPUT');
+    return recordGateScan(student.qrToken, operatorId || 'OPERATOR_MANUAL_KIOSK');
   } catch (err) {
     console.error('Failed to record manual gate scan:', err);
     return {
@@ -319,6 +319,54 @@ export async function recordManualGateScan(
       message: 'Gagal memproses absensi manual siswa.',
     };
   }
+}
+
+export interface ManualSearchStudentResult {
+  id: string;
+  fullName: string;
+  nis: string;
+  nisn: string;
+  photoUrl: string | null;
+  className: string;
+  qrToken: string;
+}
+
+/**
+ * Searches active students by Name, NIS, or NISN for manual gate entry fallback.
+ */
+export async function searchStudentsForManualGateAction(
+  query: string
+): Promise<ManualSearchStudentResult[]> {
+  const clean = query.trim();
+  if (clean.length < 2) return [];
+
+  const students = await db.student.findMany({
+    where: {
+      status: StudentStatus.ACTIVE,
+      OR: [
+        { fullName: { contains: clean, mode: 'insensitive' } },
+        { nis: { contains: clean } },
+        { nisn: { contains: clean } },
+      ],
+    },
+    include: {
+      class: {
+        select: { className: true },
+      },
+    },
+    take: 8,
+    orderBy: { fullName: 'asc' },
+  });
+
+  return students.map((s) => ({
+    id: s.id,
+    fullName: s.fullName,
+    nis: s.nis,
+    nisn: s.nisn,
+    photoUrl: s.photoUrl,
+    className: s.class.className,
+    qrToken: s.qrToken,
+  }));
 }
 
 /**

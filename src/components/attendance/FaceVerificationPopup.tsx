@@ -13,7 +13,7 @@ interface FaceVerificationPopupProps {
 export function FaceVerificationPopup({
   scanResult,
   onDismiss,
-  autoDismissMs = 4000,
+  autoDismissMs = 2500,
 }: FaceVerificationPopupProps) {
   const [progress, setProgress] = useState(100);
 

@@ -1,8 +1,10 @@
 'use client';
 
 /**
- * Zero-dependency Web Audio API synthesizer for acoustic kiosk scanner feedback.
- * Synthesizes crisp frequencies in real-time without relying on external MP3 audio files.
+ * Acoustic Kiosk Scanner Feedback Engine.
+ * Dual-engine audio architecture:
+ * 1. Plays HTML5 audio (/audio/beep-success.mp3, /audio/beep-error.mp3)
+ * 2. Seamlessly falls back to real-time Web Audio API frequency synthesis
  */
 export class SoundFeedbackEngine {
   private ctx: AudioContext | null = null;
@@ -33,11 +35,39 @@ export class SoundFeedbackEngine {
   }
 
   /**
-   * Crisp, high-frequency ascending two-tone chime for valid scan.
-   * Tone 1: 880 Hz (A5), Tone 2: 1760 Hz (A6).
+   * Plays valid scan success feedback.
+   * Attempts HTML5 Audio first; falls back to Web Audio oscillator chime (880Hz -> 1760Hz).
    */
   public playSuccess(): void {
     if (this.isMuted) return;
+
+    if (typeof Audio !== 'undefined') {
+      try {
+        const audio = new Audio('/audio/beep-success.mp3');
+        audio.volume = 0.8;
+        const playPromise = audio.play();
+        if (playPromise) {
+          playPromise.catch(() => {
+            this.playSynthSuccess();
+          });
+        }
+      } catch {
+        this.playSynthSuccess();
+      }
+    } else {
+      this.playSynthSuccess();
+    }
+
+    // Subtle tactile haptic vibration for supported mobile devices
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      navigator.vibrate(20);
+    }
+  }
+
+  /**
+   * Synthesized Web Audio chime fallback for success.
+   */
+  public playSynthSuccess(): void {
     const ctx = this.getContext();
     if (!ctx) return;
 
@@ -67,22 +97,44 @@ export class SoundFeedbackEngine {
       gain2.connect(ctx.destination);
       osc2.start(now + 0.08);
       osc2.stop(now + 0.25);
-
-      // Subtle tactile haptic vibration for supported mobile devices
-      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-        navigator.vibrate(20);
-      }
     } catch {
       // Ignore audio synthesis errors on locked autoplay policies
     }
   }
 
   /**
-   * Low double-buzz warning for errors or invalid QR tokens.
-   * Tone 1: 220 Hz, Tone 2: 180 Hz (sawtooth wave).
+   * Plays error feedback.
+   * Attempts HTML5 Audio first; falls back to Web Audio oscillator double-buzz (220Hz -> 180Hz).
    */
   public playError(): void {
     if (this.isMuted) return;
+
+    if (typeof Audio !== 'undefined') {
+      try {
+        const audio = new Audio('/audio/beep-error.mp3');
+        audio.volume = 0.8;
+        const playPromise = audio.play();
+        if (playPromise) {
+          playPromise.catch(() => {
+            this.playSynthError();
+          });
+        }
+      } catch {
+        this.playSynthError();
+      }
+    } else {
+      this.playSynthError();
+    }
+
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      navigator.vibrate([40, 30, 60]);
+    }
+  }
+
+  /**
+   * Synthesized Web Audio buzzer fallback for error.
+   */
+  public playSynthError(): void {
     const ctx = this.getContext();
     if (!ctx) return;
 
@@ -104,10 +156,6 @@ export class SoundFeedbackEngine {
 
       playBuzz(220, now, 0.12);
       playBuzz(180, now + 0.14, 0.18);
-
-      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-        navigator.vibrate([40, 30, 60]);
-      }
     } catch {
       // Ignore audio context errors
     }

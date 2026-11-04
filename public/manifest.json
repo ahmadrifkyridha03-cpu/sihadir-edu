@@ -2,7 +2,8 @@
   "name": "SiHadir-Edu - Presensi & Nilai Terpadu",
   "short_name": "SiHadir",
   "description": "Sistem Informasi Absensi, Nilai, & Dokumentasi Pembelajaran Siswa Terintegrasi Orang Tua",
-  "start_url": "/",
+  "start_url": "/parent-dashboard",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#F8FAFC",
   "theme_color": "#2563EB",
@@ -19,6 +20,22 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Presensi Hari Ini",
+      "short_name": "Presensi",
+      "description": "Cek status kedatangan siswa hari ini",
+      "url": "/parent-dashboard",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Ajukan Izin / Sakit",
+      "short_name": "Izin",
+      "description": "Formulir izin ketidakhadiran siswa",
+      "url": "/leave-request",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
     }
   ]
 }

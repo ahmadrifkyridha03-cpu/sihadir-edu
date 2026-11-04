@@ -1,18 +1,23 @@
 import type { Metadata, Viewport } from 'next';
 import { Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google';
 import { Toaster } from 'sonner';
+import { ServiceWorkerRegister } from '@/components/pwa/ServiceWorkerRegister';
 import './globals.css';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
   variable: '--font-sans',
   display: 'swap',
+  weight: ['400', '500', '600', '700'],
+  adjustFontFallback: true,
 });
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
   variable: '--font-mono',
   display: 'swap',
+  weight: ['400', '500', '600', '700'],
+  adjustFontFallback: true,
 });
 
 export const metadata: Metadata = {
@@ -50,11 +55,12 @@ export default function RootLayout({
       <body className="min-h-screen bg-background font-sans text-foreground antialiased selection:bg-primary/20">
         {children}
         <Toaster
-          position="top-right"
+          position="top-center"
           richColors
           closeButton
           duration={3500}
         />
+        <ServiceWorkerRegister />
       </body>
     </html>
   );
