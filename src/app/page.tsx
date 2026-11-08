@@ -1,6 +1,6 @@
 'use client';
 
-import { toast } from 'sonner';
+import Link from 'next/link';
 import {
   QrCode,
   GraduationCap,
@@ -12,6 +12,9 @@ import {
   AlertTriangle,
   XCircle,
   Sparkles,
+  LogIn,
+  CreditCard,
+  ShieldAlert,
 } from 'lucide-react';
 
 export default function HomePage() {
@@ -65,86 +68,105 @@ export default function HomePage() {
         {/* Core Portals Navigation Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-left">
           {/* Gate Scanner */}
-          <div className="group rounded-xl border border-border bg-surface p-5 shadow-sm transition-[border-color,box-shadow] hover:border-primary/50 hover:shadow-md">
-            <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <QrCode className="h-5 w-5" />
+          <Link
+            href="/gate-scanner"
+            className="group flex flex-col justify-between rounded-xl border border-border bg-surface p-5 shadow-sm transition-[border-color,box-shadow] hover:border-primary/50 hover:shadow-md"
+          >
+            <div>
+              <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <QrCode className="h-5 w-5" />
+              </div>
+              <h3 className="font-semibold text-foreground">Kiosk Scanner</h3>
+              <p className="mt-1 text-xs text-muted">
+                Pindai kartu QR siswa kedatangan gerbang dengan verifikasi foto anti-titip absen.
+              </p>
             </div>
-            <h3 className="font-semibold text-foreground">Kiosk Scanner</h3>
-            <p className="mt-1 text-xs text-muted">
-              Pindai kartu QR siswa kedatangan gerbang dengan verifikasi foto anti-titip absen.
-            </p>
-            <button
-              onClick={() => toast.info('Navigasi ke Gate Scanner (/gate-scanner)')}
-              className="mt-4 inline-flex items-center text-xs font-semibold text-primary group-hover:underline btn-press touch-target"
-            >
+            <span className="mt-4 inline-flex items-center text-xs font-semibold text-primary group-hover:underline btn-press touch-target">
               Buka Scanner →
-            </button>
-          </div>
+            </span>
+          </Link>
 
           {/* Teacher Portal */}
-          <div className="group rounded-xl border border-border bg-surface p-5 shadow-sm transition-[border-color,box-shadow] hover:border-primary/50 hover:shadow-md">
-            <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
-              <GraduationCap className="h-5 w-5" />
+          <Link
+            href="/dashboard"
+            className="group flex flex-col justify-between rounded-xl border border-border bg-surface p-5 shadow-sm transition-[border-color,box-shadow] hover:border-primary/50 hover:shadow-md"
+          >
+            <div>
+              <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+                <GraduationCap className="h-5 w-5" />
+              </div>
+              <h3 className="font-semibold text-foreground">Portal Guru</h3>
+              <p className="mt-1 text-xs text-muted">
+                Jurnal kelas cepat, validasi presensi, 4 badge keaktifan, dan foto kompresi &lt;180KB.
+              </p>
             </div>
-            <h3 className="font-semibold text-foreground">Portal Guru</h3>
-            <p className="mt-1 text-xs text-muted">
-              Jurnal kelas cepat, validasi presensi, 4 badge keaktifan, dan foto kompresi &lt;180KB.
-            </p>
-            <button
-              onClick={() => toast.info('Navigasi ke Dashboard Guru (/dashboard)')}
-              className="mt-4 inline-flex items-center text-xs font-semibold text-primary group-hover:underline btn-press touch-target"
-            >
+            <span className="mt-4 inline-flex items-center text-xs font-semibold text-primary group-hover:underline btn-press touch-target">
               Buka Jadwal →
-            </button>
-          </div>
+            </span>
+          </Link>
 
           {/* Parent Portal */}
-          <div className="group rounded-xl border border-border bg-surface p-5 shadow-sm transition-[border-color,box-shadow] hover:border-primary/50 hover:shadow-md">
-            <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-sky-50 text-sky-600">
-              <Users className="h-5 w-5" />
+          <Link
+            href="/parent-dashboard"
+            className="group flex flex-col justify-between rounded-xl border border-border bg-surface p-5 shadow-sm transition-[border-color,box-shadow] hover:border-primary/50 hover:shadow-md"
+          >
+            <div>
+              <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-sky-50 text-sky-600">
+                <Users className="h-5 w-5" />
+              </div>
+              <h3 className="font-semibold text-foreground">Portal Orang Tua</h3>
+              <p className="mt-1 text-xs text-muted">
+                Timeline harian 3-Detik Paham, child switcher multi-anak, nilai harian & izin sakit.
+              </p>
             </div>
-            <h3 className="font-semibold text-foreground">Portal Orang Tua</h3>
-            <p className="mt-1 text-xs text-muted">
-              Timeline harian 3-Detik Paham, child switcher multi-anak, nilai harian & izin sakit.
-            </p>
-            <button
-              onClick={() => toast.info('Navigasi ke Portal Ortu (/parent-dashboard)')}
-              className="mt-4 inline-flex items-center text-xs font-semibold text-primary group-hover:underline btn-press touch-target"
-            >
+            <span className="mt-4 inline-flex items-center text-xs font-semibold text-primary group-hover:underline btn-press touch-target">
               Buka Portal →
-            </button>
-          </div>
+            </span>
+          </Link>
 
           {/* Admin & Recap */}
-          <div className="group rounded-xl border border-border bg-surface p-5 shadow-sm transition-[border-color,box-shadow] hover:border-primary/50 hover:shadow-md">
-            <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-violet-50 text-violet-600">
-              <BarChart3 className="h-5 w-5" />
+          <Link
+            href="/recap-attendance"
+            className="group flex flex-col justify-between rounded-xl border border-border bg-surface p-5 shadow-sm transition-[border-color,box-shadow] hover:border-primary/50 hover:shadow-md"
+          >
+            <div>
+              <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-violet-50 text-violet-600">
+                <BarChart3 className="h-5 w-5" />
+              </div>
+              <h3 className="font-semibold text-foreground">Rekap & EWS</h3>
+              <p className="mt-1 text-xs text-muted">
+                Matriks 1-31 hari, kalkulasi % kehadiran, alert EWS alpa beruntun, dan export Excel/PDF.
+              </p>
             </div>
-            <h3 className="font-semibold text-foreground">Rekap & EWS</h3>
-            <p className="mt-1 text-xs text-muted">
-              Matriks 1-31 hari, kalkulasi % kehadiran, alert EWS alpa beruntun, dan export Excel/PDF.
-            </p>
-            <button
-              onClick={() => toast.info('Navigasi ke Rekap Admin (/recap-attendance)')}
-              className="mt-4 inline-flex items-center text-xs font-semibold text-primary group-hover:underline btn-press touch-target"
-            >
+            <span className="mt-4 inline-flex items-center text-xs font-semibold text-primary group-hover:underline btn-press touch-target">
               Buka Rekap →
-            </button>
-          </div>
+            </span>
+          </Link>
         </div>
 
-        {/* Interactive Toast Demo Button */}
-        <div className="pt-4">
-          <button
-            onClick={() =>
-              toast.success('Sistem SiHadir-Edu siap digunakan!', {
-                description: 'Next.js 15, Tailwind CSS, TypeScript, dan Sonner Toaster aktif.',
-              })
-            }
-            className="rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-hover btn-press touch-target"
+        {/* Quick Actions Footer */}
+        <div className="flex flex-wrap items-center justify-center gap-3 pt-4">
+          <Link
+            href="/login"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-hover btn-press touch-target"
           >
-            Uji Notifikasi Toaster
-          </button>
+            <LogIn className="h-4 w-4" />
+            Masuk / Login Sistem
+          </Link>
+          <Link
+            href="/qr-cards"
+            className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm hover:bg-slate-50 btn-press touch-target"
+          >
+            <CreditCard className="h-4 w-4 text-primary" />
+            Cetak Kartu QR Siswa
+          </Link>
+          <Link
+            href="/early-warning"
+            className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm hover:bg-slate-50 btn-press touch-target"
+          >
+            <ShieldAlert className="h-4 w-4 text-rose-600" />
+            Monitor EWS
+          </Link>
         </div>
       </div>
     </main>
