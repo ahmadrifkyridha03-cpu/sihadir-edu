@@ -1,24 +1,7 @@
 import type { Metadata, Viewport } from 'next';
-import { Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google';
 import { Toaster } from 'sonner';
 import { ServiceWorkerRegister } from '@/components/pwa/ServiceWorkerRegister';
 import './globals.css';
-
-const plusJakartaSans = Plus_Jakarta_Sans({
-  subsets: ['latin'],
-  variable: '--font-sans',
-  display: 'swap',
-  weight: ['400', '500', '600', '700'],
-  adjustFontFallback: true,
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ['latin'],
-  variable: '--font-mono',
-  display: 'swap',
-  weight: ['400', '500', '600', '700'],
-  adjustFontFallback: true,
-});
 
 export const metadata: Metadata = {
   title: 'SiHadir-Edu | Sistem Informasi Absensi & Penilaian Terpadu',
@@ -51,7 +34,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" className={`${plusJakartaSans.variable} ${jetbrainsMono.variable}`}>
+    <html lang="id">
       <body className="min-h-screen bg-background font-sans text-foreground antialiased selection:bg-primary/20">
         {children}
         <Toaster
